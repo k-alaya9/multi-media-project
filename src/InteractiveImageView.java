@@ -1,4 +1,5 @@
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.effect.ColorAdjust;
@@ -8,6 +9,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.stage.Stage;
+
 import javax.imageio.ImageIO;
 import java.io.File;
 
@@ -82,36 +85,28 @@ public class InteractiveImageView extends BorderPane {
     }
 
     private void applyColorOverlay(Rectangle selection) {
-        System.out.println(colorPicker.getValue());
-        int width = (int) Math.round(selection.getWidth());
-        int height = (int) Math.round(selection.getHeight());
 
-        // Check if either width or height is zero (or very small)
+        double scaleX = imageView.getBoundsInLocal().getWidth() / image.getWidth();
+        double scaleY = imageView.getBoundsInLocal().getHeight() / image.getHeight();
+
+        int width = (int) Math.round(selection.getWidth() / scaleX);
+        int height = (int) Math.round(selection.getHeight() / scaleY);
         if (width <= 0 || height <= 0) {
             return; // Skip processing for zero or negative dimensions
         }
 
         PixelReader reader = image.getPixelReader();
         if (reader == null) return;
-
-        WritableImage overlayImage = new WritableImage(width, height);
-        PixelWriter writer = overlayImage.getPixelWriter();
+        PixelWriter writer = editableImage.getPixelWriter();
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int imageX = (int)selection.getX() + x;
-                int imageY = (int)selection.getY() + y;
+                int imageX = (int) (selection.getX() / scaleX) + x;
+                int imageY = (int) (selection.getY() / scaleY) + y;
                 Color color = reader.getColor(imageX, imageY);
-//                double brightness = (1-color.getBrightness())*240;
-//                Color overlayColor=Color.hsb(brightness
-//                        ,1,1);
-////                writer.setColor(x, y,colorPicker.getValue()==Color.BLUE? overlayColor:colorPicker.getValue()); // Apply color with transparency
-//                writer.setColor(x, y, colorPicker.getValue().deriveColor(0, 1, brightness / 255, 1));
-                // Calculate the brightness of the pixel
 
                 double brightness = color.getBrightness();
 
-                // Calculate the blend factor based on brightness
                 double blendFactor = 1 - brightness;
 
                 // Blend between white and the picked color
@@ -121,21 +116,22 @@ public class InteractiveImageView extends BorderPane {
                         colorPicker.getValue().getBlue() * blendFactor + Color.WHITE.getBlue() * brightness
                 );
                 if(colorPicker.getValue()!=Color.WHITE)
-                writer.setColor(x, y, blendedColor);
+                writer.setColor(imageX, imageY, blendedColor);
                 else{Color overlayColor=Color.hsb((1-brightness)*240
                         ,1,1);
-                    writer.setColor(x,y,overlayColor);
+                    writer.setColor(imageX,imageY,overlayColor);
                 }
             }
         }
-        ImageView overlayView = new ImageView(overlayImage);
-        overlayView.setX(selection.getX());
-        overlayView.setY(selection.getY());
-        this.getChildren().add(overlayView);
+        imageView.setImage(editableImage);
     }
 
     private void saveImage() {
         FileChooser fileChooser = new FileChooser();
+        File dic=new File(
+                "editImage/"
+        );
+        fileChooser.setInitialDirectory(dic);
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PNG Files", "*.png"),
                 new FileChooser.ExtensionFilter("JPEG Files", "*.jpg"),
@@ -149,27 +145,5 @@ public class InteractiveImageView extends BorderPane {
                 ex.printStackTrace();
             }
         }
-    }
-    public static WritableImage convertToHeatMap(Image inputImage) {
-        int width = (int) inputImage.getWidth();
-        int height = (int) inputImage.getHeight();
-
-        WritableImage outputImage = new WritableImage(width, height);
-        PixelReader pixelReader = inputImage.getPixelReader();
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Color color = pixelReader.getColor(x, y);
-                double brightness = color.getBrightness();
-
-                // Convert brightness to a heat map color
-                double hue = (1 - brightness) * 240; // hue range for heat map: 0-240
-                Color heatMapColor = Color.hsb(hue, 1, 1);
-
-                outputImage.getPixelWriter().setColor(x, y, heatMapColor);
-            }
-        }
-
-        return outputImage;
     }
 }
