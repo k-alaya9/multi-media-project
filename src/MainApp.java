@@ -9,14 +9,21 @@ import javafx.scene.image.Image;
 import java.io.File;
 
 public class MainApp extends Application {
+    private Scene galleryScene;
+    private Scene mainScene;
 
     @Override
     public void start(Stage primaryStage) {
         BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 900, 700);
+        mainScene = new Scene(root, 900, 700);
+        galleryScene = createGalleryScene(primaryStage);
 
         InteractiveImageView interactiveImageView = new InteractiveImageView();
         root.setCenter(interactiveImageView);
+        Button displayButton = new Button("Display Gallery");
+        displayButton.setStyle("-fx-padding: 10;");
+        displayButton.setOnAction(e -> primaryStage.setScene(galleryScene));
+        root.setBottom(displayButton);
 
         Button btnLoad = new Button("Load Image");
         btnLoad.setOnAction(e -> {
@@ -36,15 +43,17 @@ public class MainApp extends Application {
             }
         });
         Button btnSave = interactiveImageView.getSaveButton();
-        HBox hbox = new HBox(10, btnLoad, interactiveImageView.getColorPicker(), btnSave);
+        HBox hbox = new HBox(10, btnLoad, interactiveImageView.getColorPicker(), btnSave,displayButton);
         hbox.setStyle("-fx-padding: 10;");
         root.setBottom(hbox); // Set the HBox at the bottom
 
         primaryStage.setTitle("Interactive Image Viewer");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(mainScene);
         primaryStage.show();
     }
-
+    private Scene createGalleryScene(Stage primaryStage) {
+        return ImageGalleryScreen.createScene(primaryStage, mainScene);
+    }
     public static void main(String[] args) {
         launch(args);
     }

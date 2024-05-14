@@ -1,18 +1,14 @@
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.stage.Stage;
-
 import javax.imageio.ImageIO;
 import java.io.File;
+import java.util.*;
 
 public class InteractiveImageView extends BorderPane {
     private ImageView imageView;
@@ -20,6 +16,8 @@ public class InteractiveImageView extends BorderPane {
     private WritableImage editableImage;
     private ColorPicker colorPicker;
     private Button btnSave;
+
+
 
     public InteractiveImageView() {
         imageView = new ImageView();
@@ -146,4 +144,10 @@ public class InteractiveImageView extends BorderPane {
             }
         }
     }
+
+
+
+
+
 }
+
