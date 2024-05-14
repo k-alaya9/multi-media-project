@@ -127,7 +127,7 @@ public class InteractiveImageView extends BorderPane {
     private void saveImage() {
         FileChooser fileChooser = new FileChooser();
         File dic=new File(
-                "editImage/"
+                "C:\\Users\\DELL\\Documents\\Project1\\editImage\\"
         );
         fileChooser.setInitialDirectory(dic);
         fileChooser.getExtensionFilters().addAll(

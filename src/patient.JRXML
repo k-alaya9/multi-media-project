@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jasperReport PUBLIC "-//JasperReports//DTD Report Design//EN" "http://jasperreports.sourceforge.net/dtds/jasperreport.dtd">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="patient_report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e029c8c5-4d3d-4d52-9a5a-48bb6af4db72">
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <queryString language="SQL">
+        <![CDATA[]]>
+    </queryString>
+    <field name="name" class="java.lang.String"/>
+    <field name="age" class="java.lang.Integer"/>
+    <field name="medicalRecordNo" class="java.lang.String"/>
+    <field name="nationality" class="java.lang.String"/>
+    <field name="diagnosis" class="java.lang.String"/>
+    <field name="date" class="java.lang.String"/>
+    <title>
+        <band height="50" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="555" height="30" uuid="b5a2e4bb-7328-40f3-8d74-91884901b8c4"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Patient Medical Report]]></text>
+            </staticText>
+        </band>
+    </title>
+    <columnHeader>
+        <band height="1" splitType="Stretch"/>
+    </columnHeader>
+    <detail>
+        <band height="180" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="100" height="20" uuid="1a7e57a1-3a33-4f7c-91cb-c22f5ab56b73"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Name:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="0" width="455" height="20" uuid="ab4889e5-3bb7-4db5-9652-d1eb4bb04ffb"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="30" width="100" height="20" uuid="2b4e93c2-4e76-4e0d-bbc0-3a5c8cf2a9e8"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Age:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="30" width="455" height="20" uuid="c6c13fa3-6a4d-4c4e-84fc-3d3e11f5d81d"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{age}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="60" width="100" height="20" uuid="3e7d0a5d-3e3c-4d34-8d7d-52d59355d1f1"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Medical Record No:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="60" width="455" height="20" uuid="ed3e3c3c-6ff5-4d3d-93b2-8e2eb29a3c31"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{medicalRecordNo}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="90" width="100" height="20" uuid="e1d35b1b-5e3f-41f6-ae30-9d66e5ff80a6"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Nationality:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="90" width="455" height="20" uuid="5a6d48e1-9139-4d1b-abb4-bb7cb178cf39"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{nationality}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="120" width="100" height="20" uuid="d5f4f5b6-5e35-4932-8575-0e0d6c3e1534"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Diagnosis:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="120" width="455" height="20" uuid="6d5f5b3d-5e34-4932-8575-0e0d6c3e1535"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{diagnosis}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="150" width="100" height="20" uuid="b5f5b5c6-5e35-4932-8575-0e0d6c3e1536"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Date:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="100" y="150" width="455" height="20" uuid="7e5f5f7d-5e35-4932-8575-0e0d6c3e1537"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="20" splitType="Stretch"/>
+    </pageFooter>
+</jasperReport>

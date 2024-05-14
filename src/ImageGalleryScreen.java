@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class ImageGalleryScreen {
 
-    private static final String IMAGE_FOLDER_PATH = "editImage";
+    private static final String IMAGE_FOLDER_PATH = "C:\\Users\\DELL\\Documents\\Project1\\editImage";
 
     public static Scene createScene(Stage primaryStage, Scene mainScene) {
         List<File> allImageFiles = loadImagesFromFolder(IMAGE_FOLDER_PATH);
@@ -30,9 +30,7 @@ public class ImageGalleryScreen {
         gridPane.setHgap(10);
         gridPane.setVgap(10);
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            updateImageGallery(gridPane, allImageFiles, newValue);
-        });
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> updateImageGallery(gridPane, allImageFiles, newValue));
 
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> primaryStage.setScene(mainScene));
@@ -40,7 +38,7 @@ public class ImageGalleryScreen {
         VBox layout = new VBox(10, searchField, new ScrollPane(gridPane), backButton);
         layout.setPadding(new Insets(10));
 
-        Scene galleryScene = new Scene(layout, 800, 600);
+        Scene galleryScene = new Scene(layout, 900, 700);
 
         // Initially display all images
         updateImageGallery(gridPane, allImageFiles, "");
