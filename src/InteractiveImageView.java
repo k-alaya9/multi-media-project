@@ -1,14 +1,17 @@
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
-import javafx.embed.swing.SwingFXUtils;
+import javafx.stage.Stage;
+
 import javax.imageio.ImageIO;
+import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.*;
 
 public class InteractiveImageView extends BorderPane {
     private ImageView imageView;
@@ -16,7 +19,6 @@ public class InteractiveImageView extends BorderPane {
     private WritableImage editableImage;
     private ColorPicker colorPicker;
     private Button btnSave;
-
 
 
     public InteractiveImageView() {
@@ -42,7 +44,16 @@ public class InteractiveImageView extends BorderPane {
     public ColorPicker getColorPicker() {
         return colorPicker;
     }
+    public Image getImage() {
+        return this.image;
+    }
+    public void setFitWidth(double width) {
+        imageView.setFitWidth(width);
+    }
 
+    public void setFitHeight(double height) {
+        imageView.setFitHeight(height);
+    }
     public Button getSaveButton() {
         return btnSave;
     }
@@ -114,7 +125,7 @@ public class InteractiveImageView extends BorderPane {
                         colorPicker.getValue().getBlue() * blendFactor + Color.WHITE.getBlue() * brightness
                 );
                 if(colorPicker.getValue()!=Color.WHITE)
-                writer.setColor(imageX, imageY, blendedColor);
+                    writer.setColor(imageX, imageY, blendedColor);
                 else{Color overlayColor=Color.hsb((1-brightness)*240
                         ,1,1);
                     writer.setColor(imageX,imageY,overlayColor);
@@ -127,7 +138,7 @@ public class InteractiveImageView extends BorderPane {
     private void saveImage() {
         FileChooser fileChooser = new FileChooser();
         File dic=new File(
-                "C:\\Users\\DELL\\Documents\\Project1\\editImage\\"
+                "editImage/"
         );
         fileChooser.setInitialDirectory(dic);
         fileChooser.getExtensionFilters().addAll(
@@ -145,9 +156,4 @@ public class InteractiveImageView extends BorderPane {
         }
     }
 
-
-
-
-
 }
-
