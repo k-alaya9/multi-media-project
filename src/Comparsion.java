@@ -135,7 +135,10 @@
 //}
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Dialog;
 import javafx.scene.image.ImageView;
 
 import java.awt.image.BufferedImage;
@@ -163,12 +166,26 @@ public class Comparsion {
         int difference = compareImages(bufferedImage1, bufferedImage2, colorPicker.getValue());
         System.out.println("Number of differences: " + difference);
         int differenceThreshold = 50;
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information Dialog");
+        alert.setHeaderText(null);
+
 
         if (difference > differenceThreshold) {
+            alert.setContentText("The patient's condition has changed.");
             System.out.println("The patient's condition has changed.");
         } else {
+            alert.setContentText("The patient's condition remains the same.");
             System.out.println("The patient's condition remains the same.");
         }
+        alert.getButtonTypes().clear();
+        alert.getButtonTypes().add(ButtonType.OK);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                System.out.println("OK button clicked.");
+            }
+        });
 
     }
 
