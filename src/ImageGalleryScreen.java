@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class ImageGalleryScreen {
 
-//    private  MedicalReportScreen reportScene;
+   private  MedicalReportScreen reportScene;
     static XRayClassifier classifier = new XRayClassifier();
 
     private static final String IMAGE_FOLDER_PATH = "C:\\Users\\DELL\\Documents\\Project1\\editImage";
@@ -75,6 +75,8 @@ public class ImageGalleryScreen {
         });
 
         HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton,MedicalReport);
+
+
         hbox.setStyle("-fx-padding: 10;");
         HBox header=new HBox(10.0D,searchField,sizeSort,DateSort);
         VBox layout = new VBox(10,header , new ScrollPane(gridPane), hbox);
@@ -160,11 +162,32 @@ public class ImageGalleryScreen {
         });
         return btnLoad;
     }
+private static Button getButton2(Stage primaryStage, InteractiveImageView imageView1, InteractiveImageView imageView2) {
+    Button button = new Button("Load Images");
+    button.setOnAction(event -> {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select First Image");
+        File file1 = fileChooser.showOpenDialog(primaryStage);
+        if (file1 != null) {
+            Image image1 = new Image(file1.toURI().toString());
+            imageView1.setImage(image1);
+        }
+
+        fileChooser.setTitle("Select Second Image");
+        File file2 = fileChooser.showOpenDialog(primaryStage);
+        if (file2 != null) {
+            Image image2 = new Image(file2.toURI().toString());
+            imageView2.setImage(image2);
+        }
+    });
+    return button;
+}
 
     private static void addImageScene(Stage primaryStage) {
         BorderPane root = new BorderPane();
         Scene addImageScene = new Scene(root, 900.0D, 700.0D);
         InteractiveImageView interactiveImageView = new InteractiveImageView();
+        interactiveImageView.setUpControls();
         root.setCenter(interactiveImageView);
         Button btnLoad = getButton(primaryStage, interactiveImageView);
         Button btnSave = interactiveImageView.getSaveButton();
@@ -212,18 +235,17 @@ public class ImageGalleryScreen {
     }
     private static void addImageSceneToCompare(Stage primaryStage) {
         BorderPane root = new BorderPane();
-        Scene addImageScene = new Scene(root, 900.0D, 700.0D);
+        Scene addImageScene1 = new Scene(root, 900.0D, 700.0D);
         InteractiveImageView interactiveImageView1 = new InteractiveImageView();
         InteractiveImageView interactiveImageView2 = new InteractiveImageView();
         interactiveImageView1.setFitWidth(400);
         interactiveImageView1.setFitHeight(400);
         interactiveImageView2.setFitWidth(400);
         interactiveImageView2.setFitHeight(400);
+        Button btnLoad1 = getButton2(primaryStage,
+                interactiveImageView1,interactiveImageView2);
 
-        root.setRight(interactiveImageView2);
-        root.setLeft(interactiveImageView1);
-        Button btnLoad1 = getButton(primaryStage, interactiveImageView1);
-        Button btnLoad2 = getButton(primaryStage, interactiveImageView2);
+
         Button compare=new Button("compare");
         compare.setOnAction(event -> Comparsion.compareImages(interactiveImageView1,interactiveImageView2));
 
@@ -231,19 +253,32 @@ public class ImageGalleryScreen {
         back.setOnAction((e) -> {
             primaryStage.setScene(createGalleryScene(primaryStage));
         });
-        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad1,btnLoad2,compare, interactiveImageView1.getColorPicker(),interactiveImageView2.getColorPicker()});
+        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad1,compare});
         hBox.setStyle("-fx-padding: 10;");
+        root.setRight(interactiveImageView2);
+        root.setLeft(interactiveImageView1);
         root.setTop(hBox);
-        primaryStage.setScene(addImageScene);
+        primaryStage.setScene(addImageScene1);
     }
     private static void addImageSceneToClassify(Stage primaryStage) {
         BorderPane root = new BorderPane();
         Scene addImageScene = new Scene(root, 900.0D, 700.0D);
         InteractiveImageView interactiveImageView1 = new InteractiveImageView();
+        interactiveImageView1.setUpControls();
         root.setCenter(interactiveImageView1);
         Button btnLoad1 = getButton(primaryStage, interactiveImageView1);
 
         Button classifyButton = new Button("Classify");
+        classifyButton.setDisable(true); // Disable the button by default
+
+        interactiveImageView1.getColorPicker().valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                classifyButton.setDisable(false); // Enable the button when a color is selected
+            } else {
+                classifyButton.setDisable(true); // Disable the button when no color is selected
+            }
+        });
+
         classifyButton.setOnAction(event -> {
             Image image = interactiveImageView1.getImage();
             if (image != null) {
@@ -264,6 +299,35 @@ public class ImageGalleryScreen {
         root.setTop(hBox);
         primaryStage.setScene(addImageScene);
     }
+//    private static void addImageSceneToClassify(Stage primaryStage) {
+//        BorderPane root = new BorderPane();
+//        Scene addImageScene = new Scene(root, 900.0D, 700.0D);
+//        InteractiveImageView interactiveImageView1 = new InteractiveImageView();
+//        interactiveImageView1.setUpControls();
+//        root.setCenter(interactiveImageView1);
+//        Button btnLoad1 = getButton(primaryStage, interactiveImageView1);
+//
+//        Button classifyButton = new Button("Classify");
+//        classifyButton.setOnAction(event -> {
+//            Image image = interactiveImageView1.getImage();
+//            if (image != null) {
+//                XRayClassifier.Severity severity = classifier.classify(image);
+//                classifier.displayClassificationResult(severity);
+//            } else {
+//                System.out.println("Error: No image loaded to classify.");
+//            }
+//        });
+//
+//        Button back = new Button("Back");
+//        back.setOnAction((e) -> {
+//            primaryStage.setScene(createGalleryScene(primaryStage));
+//        });
+//
+//        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad1, classifyButton, interactiveImageView1.getColorPicker()});
+//        hBox.setStyle("-fx-padding: 10;");
+//        root.setTop(hBox);
+//        primaryStage.setScene(addImageScene);
+//    }
     private static Scene createGalleryScene(Stage primaryStage) {
         return ImageGalleryScreen.createScene(primaryStage);
     }
