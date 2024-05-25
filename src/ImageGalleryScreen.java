@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class ImageGalleryScreen {
 
-    private Scene reportScene;
+//    private  MedicalReportScreen reportScene;
     static XRayClassifier classifier = new XRayClassifier();
 
     private static final String IMAGE_FOLDER_PATH = "C:\\Users\\DELL\\Documents\\Project1\\editImage";
@@ -69,7 +69,12 @@ public class ImageGalleryScreen {
             addImageSceneToClassify(primaryStage);
         });
 
-        HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton);
+        Button MedicalReport= new Button("create Medical Report");
+        MedicalReport.setOnAction(e->{
+            primaryStage.setScene(MedicalReportScreen.createScene(primaryStage,createGalleryScene(primaryStage)));
+        });
+
+        HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton,MedicalReport);
         hbox.setStyle("-fx-padding: 10;");
         HBox header=new HBox(10.0D,searchField,sizeSort,DateSort);
         VBox layout = new VBox(10,header , new ScrollPane(gridPane), hbox);
