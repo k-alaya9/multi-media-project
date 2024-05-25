@@ -25,8 +25,12 @@ import java.util.stream.Collectors;
 
 public class ImageGalleryScreen {
 
-   private  MedicalReportScreen reportScene;
     static XRayClassifier classifier = new XRayClassifier();
+
+    private static AudioRecorder audioRecorder;
+    private static Button startButton;
+    private static Button stopButton;
+
 
     private static final String IMAGE_FOLDER_PATH = "C:\\Users\\DELL\\Documents\\Project1\\editImage";
 
@@ -75,8 +79,6 @@ public class ImageGalleryScreen {
         });
 
         HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton,MedicalReport);
-
-
         hbox.setStyle("-fx-padding: 10;");
         HBox header=new HBox(10.0D,searchField,sizeSort,DateSort);
         VBox layout = new VBox(10,header , new ScrollPane(gridPane), hbox);
@@ -191,6 +193,32 @@ private static Button getButton2(Stage primaryStage, InteractiveImageView imageV
         root.setCenter(interactiveImageView);
         Button btnLoad = getButton(primaryStage, interactiveImageView);
         Button btnSave = interactiveImageView.getSaveButton();
+        //record voic --------------------------------
+        audioRecorder = new AudioRecorder();
+
+        startButton = new Button("Start Recording");
+        stopButton = new Button("Stop Recording");
+
+//        startButton.setDisable(true);
+        stopButton.setDisable(true);
+
+        startButton.setOnAction(e -> {
+            startRecording();
+            startButton.setDisable(true);
+            stopButton.setDisable(false);
+        });
+
+        stopButton.setOnAction(e -> {
+            stopRecording();
+            startButton.setDisable(false);
+            stopButton.setDisable(true);
+        });
+
+
+
+
+
+
         //zip image...................................................................
 
         Image image = interactiveImageView.getImage();
@@ -218,7 +246,7 @@ private static Button getButton2(Stage primaryStage, InteractiveImageView imageV
         back.setOnAction((e) -> {
             primaryStage.setScene(createGalleryScene(primaryStage));
         });
-        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(), zipButton,btnSave});
+        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(), zipButton,btnSave,startButton,stopButton});
         hBox.setStyle("-fx-padding: 10;");
         root.setTop(hBox);
         primaryStage.setScene(addImageScene);
@@ -331,5 +359,15 @@ private static Button getButton2(Stage primaryStage, InteractiveImageView imageV
     private static Scene createGalleryScene(Stage primaryStage) {
         return ImageGalleryScreen.createScene(primaryStage);
     }
+
+    private static void startRecording() {
+        audioRecorder.startRecording();
+    }
+
+    private static void stopRecording() {
+        audioRecorder.stopRecording();
+    }
+
+
 
 }
