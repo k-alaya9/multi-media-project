@@ -24,11 +24,11 @@ public class InteractiveImageView extends BorderPane {
     public InteractiveImageView() {
         imageView = new ImageView();
         setCenter(imageView);
-        setUpControls();
+        //setUpControls();
         setUpDragging();
     }
 
-    private void setUpControls() {
+    public void setUpControls() {
         colorPicker = new ColorPicker();
         btnSave = new Button("Save Image");
         btnSave.setOnAction(e -> saveImage());

@@ -1,6 +1,8 @@
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 
     public class XRayClassifier {
@@ -51,16 +53,23 @@ import javafx.scene.paint.Color;
 
         // Method to display classification result
         public void displayClassificationResult(Severity severity) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Classification Result");
+            alert.setHeaderText(null);
+
             switch (severity) {
                 case MILD:
-                    System.out.println("The medical condition is classified as MILD.");
+                    alert.setContentText("The medical condition is classified as MILD.");
                     break;
                 case MODERATE:
-                    System.out.println("The medical condition is classified as MODERATE.");
+                    alert.setContentText("The medical condition is classified as MODERATE.");
                     break;
                 case SEVERE:
-                    System.out.println("The medical condition is classified as SEVERE.");
+                    alert.setContentText("The medical condition is classified as SEVERE.");
                     break;
             }
+
+            alert.showAndWait();
         }
+
 }
