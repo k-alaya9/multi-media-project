@@ -275,20 +275,14 @@ public class ImageGalleryScreen {
             stopRecording();
             startButton.setDisable(false);
             stopButton.setDisable(true);
+            showAlert("Audio Saved", "Audio saved Successfully!");
         });
-
-
-
-
-
-
-
 
         Button back = new Button("Back");
         back.setOnAction((e) -> {
             primaryStage.setScene(createGalleryScene(primaryStage));
         });
-        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(),btnSave,startButton,stopButton});
+        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(),btnSave,startButton,stopButton, interactiveImageView.getCropButton()});
         hBox.setStyle("-fx-padding: 10;");
         root.setTop(hBox);
         primaryStage.setScene(addImageScene);
@@ -369,35 +363,6 @@ public class ImageGalleryScreen {
         root.setTop(hBox);
         primaryStage.setScene(addImageScene);
     }
-//    private static void addImageSceneToClassify(Stage primaryStage) {
-//        BorderPane root = new BorderPane();
-//        Scene addImageScene = new Scene(root, 900.0D, 700.0D);
-//        InteractiveImageView interactiveImageView1 = new InteractiveImageView();
-//        interactiveImageView1.setUpControls();
-//        root.setCenter(interactiveImageView1);
-//        Button btnLoad1 = getButton(primaryStage, interactiveImageView1);
-//
-//        Button classifyButton = new Button("Classify");
-//        classifyButton.setOnAction(event -> {
-//            Image image = interactiveImageView1.getImage();
-//            if (image != null) {
-//                XRayClassifier.Severity severity = classifier.classify(image);
-//                classifier.displayClassificationResult(severity);
-//            } else {
-//                System.out.println("Error: No image loaded to classify.");
-//            }
-//        });
-//
-//        Button back = new Button("Back");
-//        back.setOnAction((e) -> {
-//            primaryStage.setScene(createGalleryScene(primaryStage));
-//        });
-//
-//        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad1, classifyButton, interactiveImageView1.getColorPicker()});
-//        hBox.setStyle("-fx-padding: 10;");
-//        root.setTop(hBox);
-//        primaryStage.setScene(addImageScene);
-//    }
     private static Scene createGalleryScene(Stage primaryStage) {
         return ImageGalleryScreen.createScene(primaryStage);
     }
@@ -410,6 +375,12 @@ public class ImageGalleryScreen {
         audioRecorder.stopRecording();
     }
 
-
+    private static void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 
 }

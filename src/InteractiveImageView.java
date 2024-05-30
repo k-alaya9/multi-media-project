@@ -1,11 +1,17 @@
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -18,27 +24,97 @@ public class InteractiveImageView extends BorderPane {
     private Image image;
     private WritableImage editableImage;
     private ColorPicker colorPicker;
-    private Button btnSave;
+    private Button btnSave, btnCrop, btnAddText ,btnColor;
+    private MenuButton btnShapes;
+    private Pane drawingPane;
+    private ShapeDrawer shapeDrawer;
+    private TextDrawer textDrawer;
+    private ImageCropper imageCropper;
+    private String currentShapeType;
+
 
 
     public InteractiveImageView() {
         imageView = new ImageView();
-        setCenter(imageView);
-        //setUpControls();
-        setUpDragging();
+        imageView.setPreserveRatio(true);
+        drawingPane = new Pane();
+        drawingPane.getChildren().add(imageView);
+        setCenter(drawingPane);
+
+        shapeDrawer = new ShapeDrawer(drawingPane);
+        textDrawer = new TextDrawer(drawingPane);
+        imageCropper = new ImageCropper(imageView);
+        drawingPane.getChildren().add(imageCropper.getCropArea());
+
+        setUpControls();
+        setUpDrawingPaneMouseEvents();
     }
 
     public void setUpControls() {
         colorPicker = new ColorPicker();
         btnSave = new Button("Save Image");
+        btnCrop = new Button("Crop Image");
+        btnColor = new Button("Color the shape");
+        btnAddText = new Button("Add Text");
+        btnShapes = new MenuButton("Shapes");
+
+        MenuItem drawCircle = new MenuItem("Draw Circle");
+        MenuItem drawEllipse = new MenuItem("Draw Ellipse");
+        MenuItem drawTriangle = new MenuItem("Draw Triangle");
+        MenuItem drawRectangle = new MenuItem("Draw Rectangle");
+        MenuItem drawPolygon = new MenuItem("Draw Polygon");
+        MenuItem drawLine = new MenuItem("Draw Line");
+
+        btnShapes.getItems().addAll(drawCircle, drawEllipse, drawTriangle, drawRectangle, drawPolygon, drawLine);
+
         btnSave.setOnAction(e -> saveImage());
+        btnCrop.setOnAction(e -> cropImageToShape());
+        btnAddText.setOnAction(e -> startTextInputMode());
+        btnColor.setOnAction(e->applyColorOverlay());
 
-        HBox controlsBox = new HBox(10);
-        controlsBox.getChildren().addAll(colorPicker, btnSave);
+        drawCircle.setOnAction(e -> currentShapeType = "Circle");
+        drawEllipse.setOnAction(e -> currentShapeType = "Ellipse");
+        drawTriangle.setOnAction(e -> currentShapeType = "Triangle");
+        drawRectangle.setOnAction(e -> currentShapeType = "Rectangle");
+        drawPolygon.setOnAction(e -> currentShapeType = "Polygon");
+        drawLine.setOnAction(e -> currentShapeType = "Line");
+
+        HBox controlsBox = new HBox(10,  btnCrop, btnAddText, btnShapes,btnColor);
         controlsBox.setStyle("-fx-padding: 10;");
-//        setAlignment(controlsBox, javafx.geometry.Pos.CENTER);
-
         setBottom(controlsBox);
+    }
+    private void setUpDrawingPaneMouseEvents() {
+        drawingPane.setOnMousePressed(event -> {
+            if (currentShapeType != null) {
+                double startX = event.getX();
+                double startY = event.getY();
+
+                drawingPane.setOnMouseDragged(e -> {
+                    double endX = e.getX();
+                    double endY = e.getY();
+                    shapeDrawer.previewShape(currentShapeType, startX, startY, endX, endY);
+                });
+
+                drawingPane.setOnMouseReleased(e -> {
+                    double endX = e.getX();
+                    double endY = e.getY();
+                    shapeDrawer.drawShape(currentShapeType, startX, startY, endX, endY);
+                    drawingPane.setOnMouseDragged(null);
+                    drawingPane.setOnMouseReleased(null);
+                });
+            }
+        });
+    }
+
+    private void startTextInputMode() {
+        drawingPane.setOnMousePressed(event -> {
+            textDrawer.startTextInput(event);
+            drawingPane.setOnMousePressed(null); // Disable text input mode after placing one text
+        });
+    }
+
+    public Button getCropButton() {
+        return btnCrop;
     }
 
     public ColorPicker getColorPicker() {
@@ -64,42 +140,71 @@ public class InteractiveImageView extends BorderPane {
         imageView.setImage(editableImage);
         imageView.setPreserveRatio(true);
     }
+    private void cropImageToShape() {
+        Shape lastShape = null;
+        // Find the last Shape added to the drawingPane
+        for (int i = drawingPane.getChildren().size() - 1; i >= 0; i--) {
+            Node child = drawingPane.getChildren().get(i);
+            if (child instanceof Shape) {
+                lastShape = (Shape) child;
+                break;
+            }
+        }
+        Shape selection = lastShape;
 
-    private void setUpDragging() {
-        final double[] anchorX = new double[1];
-        final double[] anchorY = new double[1];
-
-        imageView.setOnMousePressed(event -> {
-            anchorX[0] = event.getX();
-            anchorY[0] = event.getY();
-            Rectangle selection = new Rectangle(anchorX[0], anchorY[0], 0, 0);
-            selection.setFill(Color.TRANSPARENT);
-            selection.setStroke(Color.BLUE);  // Temporary for visualization
-
-            this.getChildren().add(selection);
-
-            imageView.setOnMouseDragged(e -> {
-                selection.setWidth(Math.abs(e.getX() - anchorX[0]));
-                selection.setHeight(Math.abs(e.getY() - anchorY[0]));
-                selection.setX(Math.min(anchorX[0], e.getX()));
-                selection.setY(Math.min(anchorY[0], e.getY()));
-            });
-
-            imageView.setOnMouseReleased(e -> {
-                applyColorOverlay(selection);
-                imageView.setOnMouseDragged(null);
-                imageView.setOnMouseReleased(null);
-            });
-        });
-    }
-
-    private void applyColorOverlay(Rectangle selection) {
+        if (selection == null) {
+            return; // No shape found, exit the method
+        }
 
         double scaleX = imageView.getBoundsInLocal().getWidth() / image.getWidth();
         double scaleY = imageView.getBoundsInLocal().getHeight() / image.getHeight();
 
-        int width = (int) Math.round(selection.getWidth() / scaleX);
-        int height = (int) Math.round(selection.getHeight() / scaleY);
+        int width = (int) Math.round(selection.getBoundsInParent().getWidth() / scaleX);
+        int height = (int) Math.round(selection.getBoundsInParent().getHeight() / scaleY);
+        if (width <= 0 || height <= 0) {
+            return; // Skip processing for zero or negative dimensions
+        }
+
+        PixelReader reader = image.getPixelReader();
+        if (reader == null) return;
+
+        WritableImage croppedImage = new WritableImage(width, height);
+        PixelWriter writer = croppedImage.getPixelWriter();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int imageX = (int) (selection.getBoundsInParent().getMinX() / scaleX) + x;
+                int imageY = (int) (selection.getBoundsInParent().getMinY() / scaleY) + y;
+
+                // Check if the point (imageX, imageY) is inside the shape
+                if (selection.contains(selection.getBoundsInParent().getMinX() + x * scaleX, selection.getBoundsInParent().getMinY() + y * scaleY)) {
+                    Color color = reader.getColor(imageX, imageY);
+                    writer.setColor(x, y, color);
+                } else {
+                    // Optionally, you can set the color to transparent or any background color you prefer
+                    writer.setColor(x, y, Color.TRANSPARENT);
+                }
+            }
+        }
+        drawingPane.getChildren().remove(selection);
+        imageView.setImage(croppedImage);
+    }
+    private void applyColorOverlay() {
+        Shape lastShape = null;
+        for (int i = drawingPane.getChildren().size() - 1; i >= 0; i--) {
+            Node child = drawingPane.getChildren().get(i);
+            if (child instanceof Shape) {
+                lastShape = (Shape) child;
+                break;
+            }
+        }
+        Shape selection=lastShape;
+
+        double scaleX = imageView.getBoundsInLocal().getWidth() / image.getWidth();
+        double scaleY = imageView.getBoundsInLocal().getHeight() / image.getHeight();
+
+        int width = (int) Math.round(selection.getBoundsInParent().getWidth() / scaleX);
+        int height = (int) Math.round(selection.getBoundsInParent().getHeight() / scaleY);
         if (width <= 0 || height <= 0) {
             return; // Skip processing for zero or negative dimensions
         }
@@ -110,8 +215,13 @@ public class InteractiveImageView extends BorderPane {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int imageX = (int) (selection.getX() / scaleX) + x;
-                int imageY = (int) (selection.getY() / scaleY) + y;
+                int imageX = (int) (selection.getBoundsInParent().getMinX() / scaleX) + x;
+                int imageY = (int) (selection.getBoundsInParent().getMinY() / scaleY) + y;
+
+                // Check if the point (imageX, imageY) is inside the shape
+                if (!selection.contains(selection.getBoundsInParent().getMinX() + x * scaleX, selection.getBoundsInParent().getMinY() + y * scaleY)) {
+                    continue; // Skip points outside the shape
+                }
                 Color color = reader.getColor(imageX, imageY);
 
                 double brightness = color.getBrightness();
@@ -149,11 +259,23 @@ public class InteractiveImageView extends BorderPane {
         File file = fileChooser.showSaveDialog(null);
         if (file != null) {
             try {
-                ImageIO.write(SwingFXUtils.fromFXImage(editableImage, null), "png", file);
+                WritableImage writableImage = new WritableImage((int) drawingPane.getWidth(), (int) drawingPane.getHeight());
+                drawingPane.snapshot(null, writableImage);
+                ImageIO.write(SwingFXUtils.fromFXImage(writableImage, null), "png", file);
+                showAlert("Image Saved", "imaged saved Successfully!",Alert.AlertType.CONFIRMATION);
+
             } catch (Exception ex) {
+                showAlert("Error Saving Image", "Failed to save the image. Please try again.",Alert.AlertType.ERROR);
                 ex.printStackTrace();
             }
         }
+    }
+    private void showAlert(String title, String content, Alert.AlertType x) {
+        Alert alert = new Alert(x);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
 }
