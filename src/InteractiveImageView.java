@@ -36,7 +36,7 @@ public class InteractiveImageView extends BorderPane {
         HBox controlsBox = new HBox(10);
         controlsBox.getChildren().addAll(colorPicker, btnSave);
         controlsBox.setStyle("-fx-padding: 10;");
-        setAlignment(controlsBox, javafx.geometry.Pos.CENTER);
+//        setAlignment(controlsBox, javafx.geometry.Pos.CENTER);
 
         setBottom(controlsBox);
     }

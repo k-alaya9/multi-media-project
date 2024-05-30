@@ -11,7 +11,7 @@ public class AudioRecorder {
 
     private String generateUniqueFilename() {
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        return "C:\\Users\\DELL\\Documents\\Project1\\voice record\\" + timestamp + ".wav";
+        return "voice record\\" + timestamp + ".wav";
     }
 
     public void startRecording() {

@@ -35,27 +35,28 @@ import java.util.zip.*;
 public class ZipFiles {
     public static void zipFiles(byte[] imageData, byte[] audioData, byte[] pdfData, String zipFileName) {
         byte[] buffer = new byte[1024];
+        System.out.println(pdfData);
 
         try {
             FileOutputStream fos = new FileOutputStream(zipFileName);
             ZipOutputStream zos = new ZipOutputStream(fos);
 
-            // Add image data to zip
-            if (imageData != null) {
+
+            if (imageData != null && imageData.length!=0) {
                 zos.putNextEntry(new ZipEntry("image.jpg"));
                 zos.write(imageData);
                 zos.closeEntry();
             }
 
             // Add audio data to zip
-            if (audioData != null) {
-                zos.putNextEntry(new ZipEntry("audio.mp3"));
+            if (audioData != null && audioData.length !=0) {
+                zos.putNextEntry(new ZipEntry("audio.wav"));
                 zos.write(audioData);
                 zos.closeEntry();
             }
 
             // Add PDF data to zip
-            if (pdfData != null) {
+            if (pdfData != null && pdfData.length !=0) {
                 zos.putNextEntry(new ZipEntry("document.pdf"));
                 zos.write(pdfData);
                 zos.closeEntry();

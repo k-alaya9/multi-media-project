@@ -2,6 +2,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -18,8 +19,11 @@ import javafx.stage.Stage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +36,7 @@ public class ImageGalleryScreen {
     private static Button stopButton;
 
 
-    private static final String IMAGE_FOLDER_PATH = "C:\\Users\\DELL\\Documents\\Project1\\editImage";
+    private static final String IMAGE_FOLDER_PATH = "editImage";
 
     public static Scene createScene(Stage primaryStage) {
         List<File> allImageFiles = loadImagesFromFolder(IMAGE_FOLDER_PATH);
@@ -74,11 +78,70 @@ public class ImageGalleryScreen {
         });
 
         Button MedicalReport= new Button("create Medical Report");
-        MedicalReport.setOnAction(e->{
-            primaryStage.setScene(MedicalReportScreen.createScene(primaryStage,createGalleryScene(primaryStage)));
-        });
+        // MedicalReport.setOnAction(e->{
+        //     primaryStage.setScene(MedicalReportScreen.createScene(primaryStage,createGalleryScene(primaryStage)));
+        // });
 
-        HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton,MedicalReport);
+        //zip image...................................................................
+        Button zipButton=new Button("zip image");
+        zipButton.setOnAction((e) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Image File");
+            File dic=new File(
+                    "editImage/"
+            );
+            fileChooser.setInitialDirectory(dic);
+            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter[]{new FileChooser.ExtensionFilter("Image Files", new String[]{"*.png", "*.jpg", "*.gif", "*.bmp"})});
+            File file = fileChooser.showOpenDialog(primaryStage);
+            if (file != null) {
+                try {
+                    Image image = new Image(file.toURI().toString(), 800.0D, 600.0D, false, false);
+                    byte[] imageData = new byte[]{};
+                    if (image != null) {
+                        // Convert Image to byte array
+                        imageData = imageToByteArray(image);
+                    } else {
+                        System.out.println("ImageView does not have an image set.");
+                    }
+                    byte[] audioData = new byte[]{};
+                    FileChooser fileChooser1 = new FileChooser();
+                    fileChooser1.setTitle("Open Audio File");
+                    File dic1=new File(
+                            "voice record/"
+                    );
+                    fileChooser1.setInitialDirectory(dic1);
+                    fileChooser1.getExtensionFilters().addAll(new FileChooser.ExtensionFilter[]{new FileChooser.ExtensionFilter("Audio Files", new String[]{"*.wav", "*.mp3"})});
+                    File file1= fileChooser1.showOpenDialog(primaryStage);
+                    if(file1!=null){
+                        audioData= Files.readAllBytes(file1.toPath());
+                    }
+                    byte[] pdfData = new byte[]{};
+                    FileChooser fileChooser2 = new FileChooser();
+                    fileChooser2.setTitle("Open PDF File");
+                    File dic2=new File(
+                            "reports/"
+                    );
+                    fileChooser2.setInitialDirectory(dic2);
+                    fileChooser2.getExtensionFilters().addAll(new FileChooser.ExtensionFilter[]{new FileChooser.ExtensionFilter("PDF Files", new String[]{"*.pdf"})});
+                    File file2= fileChooser2.showOpenDialog(primaryStage);
+                    if(file2!=null){
+                        pdfData= Files.readAllBytes(file2.toPath());
+                    }
+                    String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+                    String zipFileName = "C:\\Users\\HP\\Desktop\\multi-media-project-main\\compreseed file\\" + timestamp + ".zip";
+                    ZipFiles.zipFiles(imageData, audioData, pdfData, zipFileName);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Zip Result");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Files successfully zipped.");
+                    alert.showAndWait();
+                } catch (Exception var6) {
+                    var6.printStackTrace();
+                }
+            }
+
+        });
+        HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton,MedicalReport,zipButton);
         hbox.setStyle("-fx-padding: 10;");
         HBox header=new HBox(10.0D,searchField,sizeSort,DateSort);
         VBox layout = new VBox(10,header , new ScrollPane(gridPane), hbox);
@@ -164,7 +227,7 @@ public class ImageGalleryScreen {
         });
         return btnLoad;
     }
-private static Button getButton2(Stage primaryStage, InteractiveImageView imageView1, InteractiveImageView imageView2) {
+    private static Button getButton2(Stage primaryStage, InteractiveImageView imageView1, InteractiveImageView imageView2) {
     Button button = new Button("Load Images");
     button.setOnAction(event -> {
         FileChooser fileChooser = new FileChooser();
@@ -219,34 +282,13 @@ private static Button getButton2(Stage primaryStage, InteractiveImageView imageV
 
 
 
-        //zip image...................................................................
 
-        Image image = interactiveImageView.getImage();
-        byte[] imageData = new byte[]{};
-        if (image != null) {
-            // Convert Image to byte array
-            imageData = imageToByteArray(image);
-        } else {
-            System.out.println("ImageView does not have an image set.");
-        }
-
-        // byte[] imageData = new byte[]{/* Image data */};
-        byte[] audioData = new byte[]{/* Audio data */};
-        byte[] pdfData = new byte[]{/* PDF data */};
-
-        String zipFileName = "C:\\Users\\DELL\\Documents\\Project1\\compreseed file/file.zip"; // Change this path to your desired location
-
-        Button zipButton=new Button("zip image");
-        byte[] finalImageData = imageData;
-        zipButton.setOnAction((e) -> {
-            ZipFiles.zipFiles(finalImageData, audioData, pdfData, zipFileName);
-        });
 
         Button back = new Button("Back");
         back.setOnAction((e) -> {
             primaryStage.setScene(createGalleryScene(primaryStage));
         });
-        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(), zipButton,btnSave,startButton,stopButton});
+        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(),btnSave,startButton,stopButton});
         hBox.setStyle("-fx-padding: 10;");
         root.setTop(hBox);
         primaryStage.setScene(addImageScene);
@@ -297,7 +339,7 @@ private static Button getButton2(Stage primaryStage, InteractiveImageView imageV
         Button btnLoad1 = getButton(primaryStage, interactiveImageView1);
 
         Button classifyButton = new Button("Classify");
-        classifyButton.setDisable(true); // Disable the button by default
+        classifyButton.setDisable(true);
 
         interactiveImageView1.getColorPicker().valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
