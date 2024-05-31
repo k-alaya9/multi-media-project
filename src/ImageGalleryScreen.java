@@ -1,5 +1,17 @@
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -12,25 +24,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class ImageGalleryScreen {
-
-    static XRayClassifier classifier = new XRayClassifier();
-
     private static AudioRecorder audioRecorder;
     private static Button startButton;
     private static Button stopButton;
@@ -44,43 +42,47 @@ public class ImageGalleryScreen {
         TextField searchField = new TextField();
         searchField.setPromptText("Search by name...");
 
-
         GridPane gridPane = new GridPane();
         gridPane.setPadding(new Insets(10));
         gridPane.setHgap(10);
         gridPane.setVgap(10);
+        gridPane.getStyleClass().add("grid-pane");
 
-        Button sizeSort= new Button("size");
+
+        Button sizeSort= new Button("filter by Size");
         sizeSort.setOnAction(e->{
             allImageFiles.sort(Comparator.comparingLong(File::length));
-            updateImageGallery(gridPane,allImageFiles,"");
+            updateImageGallery(gridPane,allImageFiles,"",primaryStage);
         });
-        Button DateSort=new Button("Last Modified");
+        Button DateSort=new Button("filter by Last Modified");
         DateSort.setOnAction(e->{
             allImageFiles.sort(Comparator.comparingLong(File::lastModified));
-            updateImageGallery(gridPane,allImageFiles,"");
+            updateImageGallery(gridPane,allImageFiles,"",primaryStage);
         });
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> updateImageGallery(gridPane, allImageFiles, newValue));
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> updateImageGallery(gridPane, allImageFiles, newValue,primaryStage));
 
 
-        Button addBtn = new Button("add new image");
+        Button addBtn = new Button("+");
         addBtn.setOnAction((e) -> {
             addImageScene(primaryStage);
         });
+        addBtn.setStyle("    -fx-padding: 8px 15px;\n" +
+                "    -fx-font-size: 40px;" +
+                "    -fx-background-color: #2CAc8d;\n" +
+                "    -fx-text-fill: white;\n" +
+                "    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0.5, 0, 5);\n" +
+                "    -fx-cursor: hand;");
         Button cButton=new Button("Compare images");
         cButton.setOnAction((e) -> {
             addImageSceneToCompare(primaryStage);
         });
-        Button classifyButton=new Button("classify image" );
-        classifyButton.setOnAction((e) -> {
-            addImageSceneToClassify(primaryStage);
-        });
 
         Button MedicalReport= new Button("create Medical Report");
-        // MedicalReport.setOnAction(e->{
-        //     primaryStage.setScene(MedicalReportScreen.createScene(primaryStage,createGalleryScene(primaryStage)));
-        // });
+         MedicalReport.setOnAction(e->{
+             primaryStage.setScene(MedicalReportScreen.createScene(primaryStage,createGalleryScene(primaryStage)));
+         });
+
 
         //zip image...................................................................
         Button zipButton=new Button("zip image");
@@ -90,6 +92,7 @@ public class ImageGalleryScreen {
             File dic=new File(
                     "editImage/"
             );
+
             fileChooser.setInitialDirectory(dic);
             fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter[]{new FileChooser.ExtensionFilter("Image Files", new String[]{"*.png", "*.jpg", "*.gif", "*.bmp"})});
             File file = fileChooser.showOpenDialog(primaryStage);
@@ -141,48 +144,211 @@ public class ImageGalleryScreen {
             }
 
         });
-        HBox hbox = new HBox(10.0D,addBtn,cButton,classifyButton,MedicalReport,zipButton);
-        hbox.setStyle("-fx-padding: 10;");
-        HBox header=new HBox(10.0D,searchField,sizeSort,DateSort);
-        VBox layout = new VBox(10,header , new ScrollPane(gridPane), hbox);
-        layout.setPadding(new Insets(10));
 
-        Scene galleryScene = new Scene(layout, 900, 700);
+        HBox header=new HBox(10.0D,searchField,sizeSort,DateSort,cButton,MedicalReport,zipButton);
+        header.getStyleClass().add("hbox");
 
-        // Initially display all images
-        updateImageGallery(gridPane, allImageFiles, "");
-
+        BorderPane layout = new BorderPane();
+        layout.setTop(header);
+        ScrollPane scrollPane=new ScrollPane(gridPane);
+        layout.setCenter(scrollPane);
+        StackPane stackPane= new StackPane(layout,addBtn);
+        StackPane.setMargin(addBtn,new Insets(30));
+        StackPane.setAlignment(addBtn,Pos.BOTTOM_RIGHT);
+        Scene galleryScene= new Scene(stackPane, 900, 700);
+        galleryScene.getStylesheets().add("style.css");
+        updateImageGallery(gridPane, allImageFiles, "",primaryStage);
+        String filter="";
+        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> updateGrid(gridPane, allImageFiles, filter, primaryStage));
+        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> updateGrid(gridPane, allImageFiles, filter, primaryStage));
         return galleryScene;
     }
-
-    private static void updateImageGallery(GridPane gridPane, List<File> allImageFiles, String filter) {
+    private static void updateImageGallery(GridPane gridPane, List<File> allImageFiles, String filter, Stage primaryStage) {
         gridPane.getChildren().clear();
 
         List<File> filteredFiles = allImageFiles.stream()
                 .filter(file -> file.getName().toLowerCase().contains(filter.toLowerCase()))
                 .collect(Collectors.toList());
 
+        updateGrid(gridPane, filteredFiles, filter, primaryStage);
+    }
+
+    private static void updateGrid(GridPane gridPane, List<File> filteredFiles, String filter, Stage primaryStage) {
+        gridPane.getChildren().clear();
+
+        Scene scene = primaryStage.getScene();
+        if (scene == null) return; // Return if scene is not set yet
+
+        double sceneWidth = scene.getWidth();
+        double imageWidth = 150; // Width of the image view
+        double spacing = 20; // Spacing between images
+
+        // Calculate number of columns
+        int numCols = (int) (sceneWidth / (imageWidth + spacing));
+
         int row = 0;
         int col = 0;
+
         for (File imageFile : filteredFiles) {
             Image image = new Image(imageFile.toURI().toString());
             ImageView imageView = new ImageView(image);
-            imageView.setFitWidth(100);
-            imageView.setFitHeight(100);
+            imageView.setFitWidth(imageWidth);
+            imageView.setFitHeight(200);
             imageView.setPreserveRatio(true);
+            imageView.setStyle("-fx-padding: 5;" +
+                    "-fx-border-color: #084B83;" +
+                    "-fx-border-width: 2;" +
+                    "-fx-border-radius: 10;" +
+                    "-fx-background-radius: 10;");
+            imageView.setOnMouseEntered(e -> imageView.setStyle("-fx-effect: dropshadow(gaussian, rgba(10, 35, 66, 0.5), 10, 0.7, 0, 0);" +
+                    "-fx-cursor: hand;"));
+            imageView.setOnMouseExited(e -> imageView.setStyle("-fx-padding: 5;" +
+                    "-fx-border-color: #084B83;" +
+                    "-fx-border-width: 2;" +
+                    "-fx-border-radius: 10;" +
+                    "-fx-background-radius: 10;"));
+            imageView.setOnMouseClicked(e -> {
+                BorderPane root = new BorderPane();
+                Scene addImageScene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
+                addImageScene.getStylesheets().add("style.css");
+                InteractiveImageView interactiveImageView = new InteractiveImageView(false);
+                interactiveImageView.setImage(imageView.getImage());
+                interactiveImageView.setUpControls();
+                root.setCenter(interactiveImageView);
+                Button btnLoad = getButton(primaryStage, interactiveImageView);
+                Button btnSave = interactiveImageView.getSaveButton();
+
+                // Audio recording
+                AudioRecorder audioRecorder = new AudioRecorder();
+                Button startButton = new Button("Start Recording");
+                Button stopButton = new Button("Stop Recording");
+
+                stopButton.setDisable(true);
+
+                startButton.setOnAction(event -> {
+                    audioRecorder.startRecording();
+                    startButton.setDisable(true);
+                    stopButton.setDisable(false);
+                });
+
+                stopButton.setOnAction(event -> {
+                    audioRecorder.stopRecording();
+                    startButton.setDisable(false);
+                    stopButton.setDisable(true);
+                    showAlert("Audio Saved", "Audio saved Successfully!");
+                });
+
+                Button back = new Button("Back");
+                back.setOnAction(event -> primaryStage.setScene(createGalleryScene(primaryStage)));
+
+                HBox hBox = new HBox(10.0, back, btnLoad, interactiveImageView.getColorPicker(), btnSave, startButton, stopButton, interactiveImageView.getCropButton());
+                hBox.setStyle("-fx-padding: 10;");
+                hBox.getStyleClass().add("hbox");
+                root.setTop(hBox);
+                primaryStage.setScene(addImageScene);
+            });
 
             Label label = new Label(imageFile.getName());
+            label.getStyleClass().add("label");
 
             gridPane.add(imageView, col, row);
             gridPane.add(label, col, row + 1);
 
             col++;
-            if (col > 8) {
+            if (col >= numCols) {
                 col = 0;
                 row += 2;
             }
         }
     }
+
+
+    //    private static void updateImageGallery(GridPane gridPane, List<File> allImageFiles, String filter,Stage primaryStage) {
+//        gridPane.getChildren().clear();
+//
+//        List<File> filteredFiles = allImageFiles.stream()
+//                .filter(file -> file.getName().toLowerCase().contains(filter.toLowerCase()))
+//                .collect(Collectors.toList());
+//
+//        int row = 0;
+//        int col = 0;
+//        for (File imageFile : filteredFiles) {
+//            Image image = new Image(imageFile.toURI().toString());
+//            ImageView imageView = new ImageView(image);
+//            imageView.setFitWidth(150);
+//            imageView.setFitHeight(200);
+//            imageView.setPreserveRatio(true);
+//            imageView.setStyle("  -fx-padding: 5;\n" +
+//                    "    -fx-border-color: #084B83;\n" +
+//                    "    -fx-border-width: 2;\n" +
+//                    "    -fx-border-radius: 10;\n" +
+//                    "    -fx-background-radius: 10;\n"
+//                        );
+//            imageView.setOnMouseEntered(e->
+//                    imageView.setStyle("-fx-effect: dropshadow(gaussian, rgba(10, 35, 66, 0.5), 10, 0.7, 0, 0);\n" +
+//            "    -fx-cursor: hand;"));
+//            imageView.setOnMouseExited(e->imageView.setStyle("  -fx-padding: 5;\n" +
+//                    "    -fx-border-color: #084B83;\n" +
+//                    "    -fx-border-width: 2;\n" +
+//                    "    -fx-border-radius: 10;\n" +
+//                    "    -fx-background-radius: 10;\n"
+//            ));
+//            imageView.setOnMouseClicked(e->
+//            {
+//                BorderPane root = new BorderPane();
+//                Scene addImageScene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
+//                addImageScene.getStylesheets().add("style.css");
+//                InteractiveImageView interactiveImageView = new InteractiveImageView(false);
+//                interactiveImageView.setImage(imageView.getImage());
+//                interactiveImageView.setUpControls();
+//                root.setCenter(interactiveImageView);
+//                Button btnLoad = getButton(primaryStage, interactiveImageView);
+//                Button btnSave = interactiveImageView.getSaveButton();
+//                //record voic --------------------------------
+//                audioRecorder = new AudioRecorder();
+//
+//                startButton = new Button("Start Recording");
+//                stopButton = new Button("Stop Recording");
+//
+//                stopButton.setDisable(true);
+//
+//                startButton.setOnAction(event -> {
+//                    startRecording();
+//                    startButton.setDisable(true);
+//                    stopButton.setDisable(false);
+//                });
+//
+//                stopButton.setOnAction(event -> {
+//                    stopRecording();
+//                    startButton.setDisable(false);
+//                    stopButton.setDisable(true);
+//                    showAlert("Audio Saved", "Audio saved Successfully!");
+//                });
+//
+//                Button back = new Button("Back");
+//                back.setOnAction((event) -> {
+//                    primaryStage.setScene(createGalleryScene(primaryStage));
+//                });
+//                HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(), btnSave, startButton, stopButton, interactiveImageView.getCropButton()});
+//                hBox.setStyle("-fx-padding: 10;");
+//                hBox.getStyleClass().add("hbox");
+//                root.setTop(hBox);
+//                primaryStage.setScene(addImageScene);
+//            });
+//
+//            Label label = new Label(imageFile.getName());
+//            label.getStyleClass().add("label");
+//
+//            gridPane.add(imageView, col, row);
+//            gridPane.add(label, col, row + 1);
+//
+//            col++;
+//            if (col > 4) {
+//                col = 0;
+//                row += 2;
+//            }
+//        }
+//    }
     public static List<File> loadImagesFromFolder(String folderPath) {
         File folder = new File(folderPath);
         File[] files = folder.listFiles();
@@ -250,8 +416,9 @@ public class ImageGalleryScreen {
 
     private static void addImageScene(Stage primaryStage) {
         BorderPane root = new BorderPane();
-        Scene addImageScene = new Scene(root, 900.0D, 700.0D);
-        InteractiveImageView interactiveImageView = new InteractiveImageView();
+        Scene addImageScene = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
+        addImageScene.getStylesheets().add("style.css");
+        InteractiveImageView interactiveImageView = new InteractiveImageView(false);
         interactiveImageView.setUpControls();
         root.setCenter(interactiveImageView);
         Button btnLoad = getButton(primaryStage, interactiveImageView);
@@ -283,6 +450,7 @@ public class ImageGalleryScreen {
             primaryStage.setScene(createGalleryScene(primaryStage));
         });
         HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad, interactiveImageView.getColorPicker(),btnSave,startButton,stopButton, interactiveImageView.getCropButton()});
+        hBox.getStyleClass().add("hbox");
         hBox.setStyle("-fx-padding: 10;");
         root.setTop(hBox);
         primaryStage.setScene(addImageScene);
@@ -299,9 +467,10 @@ public class ImageGalleryScreen {
     }
     private static void addImageSceneToCompare(Stage primaryStage) {
         BorderPane root = new BorderPane();
-        Scene addImageScene1 = new Scene(root, 900.0D, 700.0D);
-        InteractiveImageView interactiveImageView1 = new InteractiveImageView();
-        InteractiveImageView interactiveImageView2 = new InteractiveImageView();
+        Scene addImageScene1 = new Scene(root, primaryStage.getWidth(), primaryStage.getHeight());
+        addImageScene1.getStylesheets().add("style.css");
+        InteractiveImageView interactiveImageView1 = new InteractiveImageView(true);
+        InteractiveImageView interactiveImageView2 = new InteractiveImageView(true);
         interactiveImageView1.setFitWidth(400);
         interactiveImageView1.setFitHeight(400);
         interactiveImageView2.setFitWidth(400);
@@ -319,49 +488,11 @@ public class ImageGalleryScreen {
         });
         HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad1,compare});
         hBox.setStyle("-fx-padding: 10;");
-        root.setRight(interactiveImageView2);
-        root.setLeft(interactiveImageView1);
+        hBox.getStyleClass().add("hbox");
+        HBox center=new HBox(10,interactiveImageView2,interactiveImageView1);
+        root.setCenter(center);
         root.setTop(hBox);
         primaryStage.setScene(addImageScene1);
-    }
-    private static void addImageSceneToClassify(Stage primaryStage) {
-        BorderPane root = new BorderPane();
-        Scene addImageScene = new Scene(root, 900.0D, 700.0D);
-        InteractiveImageView interactiveImageView1 = new InteractiveImageView();
-        interactiveImageView1.setUpControls();
-        root.setCenter(interactiveImageView1);
-        Button btnLoad1 = getButton(primaryStage, interactiveImageView1);
-
-        Button classifyButton = new Button("Classify");
-        classifyButton.setDisable(true);
-
-        interactiveImageView1.getColorPicker().valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                classifyButton.setDisable(false); // Enable the button when a color is selected
-            } else {
-                classifyButton.setDisable(true); // Disable the button when no color is selected
-            }
-        });
-
-        classifyButton.setOnAction(event -> {
-            Image image = interactiveImageView1.getImage();
-            if (image != null) {
-                XRayClassifier.Severity severity = classifier.classify(image);
-                classifier.displayClassificationResult(severity);
-            } else {
-                System.out.println("Error: No image loaded to classify.");
-            }
-        });
-
-        Button back = new Button("Back");
-        back.setOnAction((e) -> {
-            primaryStage.setScene(createGalleryScene(primaryStage));
-        });
-
-        HBox hBox = new HBox(10.0D, new Node[]{back, btnLoad1, classifyButton, interactiveImageView1.getColorPicker()});
-        hBox.setStyle("-fx-padding: 10;");
-        root.setTop(hBox);
-        primaryStage.setScene(addImageScene);
     }
     private static Scene createGalleryScene(Stage primaryStage) {
         return ImageGalleryScreen.createScene(primaryStage);

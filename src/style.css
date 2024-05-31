@@ -1,0 +1,105 @@
+.root {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-background-color: #F0F6F6;
+}
+
+.button {
+    -fx-background-color: #0A2342;
+    -fx-text-fill: white;
+    -fx-padding: 10px 10px;
+    -fx-font-size: 14px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.button:hover {
+    -fx-background-color: #2CAc8d;
+    -fx-effect: dropshadow(gaussian, rgba(1,1,1,0.5), 5, 0.5, 0, 2);
+
+}
+
+.button:pressed {
+    -fx-background-color: #045b73;
+}
+
+.hbox {
+    -fx-padding: 20px;
+    -fx-spacing: 10px;
+    -fx-background-color: #0A2342;
+}
+
+.vbox {
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.5, 0, 0);
+}
+
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #2CA58D;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+    -fx-text-fill: black;
+}
+
+
+.label {
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+.grid-pane {
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+    -fx-vgap: 10px;
+    -fx-hgap: 10px;
+}
+
+.menu-button {
+    -fx-background-color: #0A2342;
+    -fx-text-fill: white;
+    -fx-padding:  5px;
+    -fx-font-size: 14px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.menu-button:hover {
+        -fx-background-color: #2CAc8d;
+        -fx-text-fill: white;
+        -fx-effect: dropshadow(gaussian, rgba(1,1,1,0.5), 5, 0.5, 0, 2);
+}
+
+.menu-button:pressed {
+    -fx-background-color: #045b73;
+}
+
+.menu {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: white;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.menu:hover {
+    -fx-background-color: #2CA58D;
+}
+
+.menu:pressed {
+    -fx-background-color: #045b73;
+}
