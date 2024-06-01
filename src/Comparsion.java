@@ -134,13 +134,13 @@
 //    }
 //}
 
+import java.awt.image.BufferedImage;
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.ImageView;
-
-import java.awt.image.BufferedImage;
 
 public class Comparsion {
 
@@ -156,7 +156,12 @@ public class Comparsion {
         ColorPicker colorPicker=new ColorPicker();
         if (imageView1.getImage() == null || imageView2.getImage() == null) {
             System.out.println("Error: Both images must be loaded.");
-
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Error: Both images must be loaded.");
+            alert.showAndWait();
+            return;
         }
 
         BufferedImage bufferedImage1 = SwingFXUtils.fromFXImage(imageView1.getImage(), null);

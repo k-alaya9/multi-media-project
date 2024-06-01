@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
@@ -27,7 +28,7 @@ public class InteractiveImageView extends BorderPane {
     private Image image;
     private WritableImage editableImage;
     private ColorPicker colorPicker;
-    private Button btnSave, btnCrop, btnAddText ,btnColor,classifyButton;
+    private Button btnSave, btnCrop, btnAddText ,btnColor,classifyButton,FTButton;
 
     private MenuButton btnShapes;
     private Pane drawingPane;
@@ -37,6 +38,7 @@ public class InteractiveImageView extends BorderPane {
     private String currentShapeType;
     private boolean IsCompare;
 
+    private FourierTransformations Ft;
 
 
     public InteractiveImageView(boolean IsCompare) {
@@ -66,7 +68,18 @@ public class InteractiveImageView extends BorderPane {
         btnAddText = new Button("Add Text");
         btnShapes = new MenuButton("Shapes");
         btnShapes.getStyleClass().add("menu-button");
-
+        FTButton= new Button("FourierTransformations");
+        FTButton.setOnAction(e->{
+            try {
+                Ft= new FourierTransformations(image);
+                if(Ft.Edited_Image!=null){
+                    imageView.setImage(Ft.Edited_Image);
+                    setImage(Ft.Edited_Image);
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         MenuItem drawCircle = new MenuItem("Draw Circle");
         MenuItem drawEllipse = new MenuItem("Draw Ellipse");
         MenuItem drawTriangle = new MenuItem("Draw Triangle");
@@ -93,7 +106,7 @@ public class InteractiveImageView extends BorderPane {
           classifyImage();
         });
 
-        HBox controlsBox = new HBox(10,  btnCrop, btnAddText, btnShapes,btnColor,classifyButton);
+        HBox controlsBox = new HBox(10,  btnCrop, btnAddText, btnShapes,btnColor,classifyButton,FTButton);
         controlsBox.getStyleClass().add("hbox");
         controlsBox.setStyle("-fx-padding: 10;");
         setBottom(controlsBox);
