@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -33,7 +34,7 @@ public class ImageGalleryScreen {
     private static Button startButton;
     private static Button stopButton;
 
-
+    private static ShareFiles shareFiles;
     private static final String IMAGE_FOLDER_PATH = "editImage";
 
     public static Scene createScene(Stage primaryStage) {
@@ -67,12 +68,39 @@ public class ImageGalleryScreen {
         addBtn.setOnAction((e) -> {
             addImageScene(primaryStage);
         });
+
         addBtn.setStyle("    -fx-padding: 8px 15px;\n" +
                 "    -fx-font-size: 40px;" +
                 "    -fx-background-color: #2CAc8d;\n" +
                 "    -fx-text-fill: white;\n" +
                 "    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0.5, 0, 5);\n" +
                 "    -fx-cursor: hand;");
+        File tele=new File("C:\\Users\\HP\\Desktop\\multi-media-project\\lib\\Telegram.png");
+        Image telegramIcon = new Image(tele.toURI().toString());
+
+        ImageView imageView = new ImageView(telegramIcon);
+        imageView.setFitWidth(50);
+        imageView.setFitHeight(50);
+        imageView.setSmooth(true);
+        Button shareButton= new Button("",imageView);
+        shareButton.setStyle("    -fx-padding: 7px 10px;\n" +
+                "    -fx-background-color: #20a0e1;\n" +
+                "    -fx-text-fill: white;\n" +
+                "    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0.5, 0, 5);\n" +
+                "    -fx-cursor: hand;");
+        shareButton.setOnAction(
+                e->{
+                    FileChooser fileChooser = new FileChooser();
+                    File dic=new File(
+                            "C:\\Users\\HP\\Desktop\\multi-media-project\\"
+                    );
+                    fileChooser.setInitialDirectory(dic);
+                    File file = fileChooser.showOpenDialog(primaryStage);
+                    if(file!=null) {
+                        shareFiles = new ShareFiles(file);
+                    }
+                }
+        );
         Button cButton=new Button("Compare images");
         cButton.setOnAction((e) -> {
             addImageSceneToCompare(primaryStage);
@@ -94,7 +122,7 @@ public class ImageGalleryScreen {
             );
 
             fileChooser.setInitialDirectory(dic);
-            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter[]{new FileChooser.ExtensionFilter("Image Files", new String[]{"*.png", "*.jpg", "*.gif", "*.bmp"})});
+            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter[]{new FileChooser.ExtensionFilter("Image Files", new String[]{"*.png", "*.jpg","*.jpeg", "*.gif", "*.bmp"})});
             File file = fileChooser.showOpenDialog(primaryStage);
             if (file != null) {
                 try {
@@ -131,7 +159,7 @@ public class ImageGalleryScreen {
                         pdfData= Files.readAllBytes(file2.toPath());
                     }
                     String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-                    String zipFileName = "C:\\Users\\HP\\Desktop\\multi-media-project-main\\compreseed file\\" + timestamp + ".zip";
+                    String zipFileName = "compreseed file\\" + timestamp + ".zip";
                     ZipFiles.zipFiles(imageData, audioData, pdfData, zipFileName);
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Zip Result");
@@ -152,9 +180,17 @@ public class ImageGalleryScreen {
         layout.setTop(header);
         ScrollPane scrollPane=new ScrollPane(gridPane);
         layout.setCenter(scrollPane);
-        StackPane stackPane= new StackPane(layout,addBtn);
-        StackPane.setMargin(addBtn,new Insets(30));
-        StackPane.setAlignment(addBtn,Pos.BOTTOM_RIGHT);
+        HBox fabs=new HBox(10,addBtn,shareButton);
+        fabs.setPrefSize(120, 120);
+        fabs.setMinSize(50, 50);
+        fabs.setMaxSize(150, 150);
+        fabs.setStyle("-fx-background-color:Transparent;" +
+                "-fx-alignment:BOTTOM_RIGHT"
+                );
+        StackPane stackPane= new StackPane(layout,fabs);
+        StackPane.setMargin(fabs,new Insets(30));
+
+        StackPane.setAlignment(fabs,Pos.BOTTOM_RIGHT);
         Scene galleryScene= new Scene(stackPane, 900, 700);
         galleryScene.getStylesheets().add("style.css");
         updateImageGallery(gridPane, allImageFiles, "",primaryStage);

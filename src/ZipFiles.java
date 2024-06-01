@@ -35,7 +35,6 @@ import java.util.zip.*;
 public class ZipFiles {
     public static void zipFiles(byte[] imageData, byte[] audioData, byte[] pdfData, String zipFileName) {
         byte[] buffer = new byte[1024];
-        System.out.println(pdfData);
 
         try {
             FileOutputStream fos = new FileOutputStream(zipFileName);
